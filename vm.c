@@ -30,11 +30,18 @@ typedef struct
 //Function to read the file and store data into instruction array
 int readFile(FILE* reader,instruction list[], int counter);
 
+// Function to print the instruction
+void printInstruction(instruction ins);
+
 //Function to print the results
 void printList(instruction list[], int counter);
 
+// execution function to execute instructions
+void execute(instruction instruction, cpu *cpuList, int stack[]);
 
+char INSTRUCTION[][4] = {"","LIT","OPR","LOD","STO","CAL","INC","JMP","JPC","SIO"};
 
+char OPR[][4] = {"RET","NEG","ADD","SUB","MUL","DIV","ODD","MOD","EQL","NEQ","LSS","LEQ","GTR","GEQ"};
 
 int main(int argc, char *argv[])
 {
@@ -68,16 +75,26 @@ int main(int argc, char *argv[])
 
     //Print out the read-in instructions
     printList(instructionList, instructionCount);
-    /*
     //Initial execution
     printf("\n");
-    printf("Execution.\n");
-    printf("\t\t\t\tpc\tbp\tsp\stack\n");
-    printf("\t\t\t\t%d\t%d\t\%d\n", cpuList.pc, cpuList.bp, cpuList.sp);
+    printf("Execution:\n");
+    printf("\t\t\t\tpc\tbp\tsp\tstack\n");
+    printf("\t\t\t\t%2d\t%2d\t\%2d\n", cpuList.pc, cpuList.bp, cpuList.sp);
 
     //Execution
-    */
+	
+	// demo for now
+	// change later	
+	int i;
+	for(i=0;i<instructionCount;i++)
+	{
+		printf(" %2d  ",i);
+		printInstruction(instructionList[i]);
+		puts("");
+		execute(instructionList[i],&cpuList,stack);
+	}
 
+		
     return 0;
 
 
@@ -99,11 +116,9 @@ int readFile(FILE* reader, instruction list[], int counter)
         //If there are too many instructions, stop the program
         if(counter > MAX_CODE_LENGTH)
             return -1;
-
     }
 
     fclose(reader);
-
     return counter;
 
 }
@@ -111,95 +126,72 @@ int readFile(FILE* reader, instruction list[], int counter)
 void printList(instruction list[], int counter)
 {
     int i;
-
     printf("PL/0 code:\n");
     printf("\n");
     for(i = 0; i<counter; i++)
     {
-
-        printf("%d\t", i);
-
-        //Switch case to determine what will be printed
-        switch(list[i].op)
-        {
-            case 1:
-                printf("LIT\t\t%d\n", list[i].m);
-                break;
-            //Since OPR can have many cases, we have a switch function here
-            case 2:
-                switch(list[i].m)
-                {
-                    case 0:
-                        printf("RET\n");
-                        break;
-                    case 1:
-                        printf("NEG\n");
-                        break;
-                    case 2:
-                        printf("ADD\n");
-                        break;
-                    case 3:
-                        printf("SUB\n");
-                        break;
-                    case 4:
-                        printf("MUL\n");
-                        break;
-                    case 5:
-                        printf("DIV\n");
-                        break;
-                    case 6:
-                        printf("ODD\n");
-                        break;
-                    case 7:
-                        printf("MOD\n");
-                        break;
-                    case 8:
-                        printf("EQL\n");
-                        break;
-                    case 9:
-                        printf("NEQ\n");
-                        break;
-                    case 10:
-                        printf("LSS\n");
-                        break;
-                    case 11:
-                        printf("LEQ\n");
-                        break;
-                    case 12:
-                        printf("GTR\n");
-                        break;
-                    case 13:
-                        printf("GEQ\n");
-                        break;
-                }
-                break;
-
-            case 3:
-                printf("LOD\t%d\t%d\n", list[i].l, list[i].m);
-                break;
-            case 4:
-                printf("STO\t%d\t%d\n", list[i].l, list[i].m);
-                break;
-            case 5:
-                printf("CAL\t%d\t%d\n", list[i].l, list[i].m);
-                break;
-            case 6:
-                printf("INC\t\t%d\n", list[i].m);
-                break;
-            case 7:
-                printf("JMP\t\t%d\n", list[i].m);
-                break;
-            case 8:
-                printf("JPC\t\t%d\n", list[i].m);
-                break;
-            case 9:
-                if(list[i].m == 2)
-                    printf("HLT\n");
-                break;
-
-        }
+		printf(" %2d  ",i);
+		printInstruction(list[i]);
+		puts("");
     }
+}
 
+void execute(instruction instruction, cpu *cpuList, int stack[])
+{
+	switch(instruction.op)
+	{
+		// 06 INC 0 M 
+		// Allocate M locals on stack
+		case 6:
+			cpuList->sp += instruction.m;
+			break;
+		// 07 JMP 0 M
+		// Jump to M
+		case 7:
+			cpuList->pc = instruction.m;
+			break;
+		// 08 JPC 0 M
+		// Pop stack and jump to M if value is equal to 0
+		case 8:
+			if (stack[cpuList->sp] == 0)
+			{
+				cpuList->pc = instruction.m;
+				cpuList->sp--;
+			}
+			break;
+		// 09 SIO System input & ouput operation
+		case 9:
+			switch(instruction.m)
+			{
+				// System output
+				// Pop stack and print out value
+				case 0:
+					printf("%d",stack[cpuList->sp]);
+					cpuList->sp--;
+				// System input
+				// Read in input from user and push it
+				case 1:
+					cpuList->sp++;
+					scanf("%d",stack+cpuList->sp);
+				// Halt the machine
+				case 2:
+					exit(0);
+			}
+		
+	}
+}
 
-
+void printInstruction(instruction ins)
+{
+	// Halt instruction
+	if(ins.op == 9 && ins.m ==2)
+		printf("HLT");
+	// Arithmetic/logical instructions
+	else if(ins.op == 2)
+		printf("%s", OPR[ins.m]);
+	// instructions that need to display level
+	else if(ins.op == 3 || ins.op == 4 || ins.op == 5)
+		printf("%s  %3d %4d", INSTRUCTION[ins.op],ins.l,ins.m);
+	else
+		printf("%s  %3s %4d", INSTRUCTION[ins.op],"",ins.m);	
 }
