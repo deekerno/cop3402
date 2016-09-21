@@ -140,6 +140,81 @@ void execute(instruction instruction, cpu *cpuList, int stack[])
 {
 	switch(instruction.op)
 	{
+		// 02 OPR 0 M
+		// Arithmetic operations
+		case 2:
+			// 0 RET
+			case 0:
+				cpuList->sp = cpuList->bp - 1;
+				cpuList->pc = stack[cpuList->sp + 4];
+				cpuList->bp = stack[cpuList->sp + 3];
+				break;
+			// 1 NEG
+			case 1:
+				stack[cpuList->sp] *= -1;
+				break;
+			// 2 ADD
+			case 2:
+				cpuList->sp -= 1;
+				stack[cpuList->sp] += stack[cpuList->sp + 1];
+				break;
+			// 3 SUB
+			case 3:
+				cpuList->sp -= 1;
+				stack[cpuList->sp] -= stack[cpuList->sp + 1];
+				break;
+			// 4 MUL
+			case 4:
+				cpuList->sp -= 1;
+				stack[cpuList->sp] *= stack[cpuList->sp + 1];
+				break;
+			// 5 DIV
+			case 5:
+				cpuList->sp -= 1;
+				stack[cpuList->sp] /= stack[cpuList->sp + 1];
+				break;
+			// 6 ODD
+			case 6:
+				stack[cpuList->sp] = stack[cpuList->sp] % 2;
+				break;
+			// 7 MOD
+			case 7:
+				cpuList->sp -= 1;
+				stack[cpuList->sp] = stack[cpuList->sp] % stack[cpuList->sp + 1];
+				break;
+			// 8 EQL
+			case 8:
+				cpuList->sp -= 1;
+				stack[cpuList->sp] = stack[cpuList->sp] == stack[cpuList->sp + 1] ? 1 : 0;
+				break;
+			// 9 NEQ
+			case 9:
+				cpuList->sp -= 1;
+				stack[cpuList->sp] = stack[cpuList->sp] != stack[cpuList->sp + 1] ? 1 : 0;
+				break;
+			// 10 LSS
+			case 10:
+				cpuList->sp -= 1;
+				stack[cpuList->sp] = stack[cpuList->sp] < stack[cpuList->sp + 1] ? 1 : 0;
+				break;
+			// 11 LEQ
+			case 11:
+				cpuList->sp -= 1;
+				stack[cpuList->sp] = stack[cpuList->sp] <= stack[cpuList->sp + 1] ? 1 : 0;
+				break;
+			// 12 GTR
+			case 12:
+				cpuList->sp -= 1;
+				stack[cpuList->sp] = stack[cpuList->sp] > stack[cpuList->sp + 1] ? 1 : 0;
+				break;
+			// 13 GEQ
+			case 13:
+				cpuList->sp -= 1;
+				stack[cpuList->sp] = stack[cpuList->sp] >= stack[cpuList->sp + 1] ? 1 : 0;
+				break;
+			// Shouldn't hit this, but including it just in case.
+			default:
+				break;
 		// 06 INC 0 M 
 		// Allocate M locals on stack
 		case 6:
