@@ -321,8 +321,9 @@ int execute(instruction instruction, cpu *cpuList, int stack[])
 
 int base (int l, int base, int stack[])
 {
+	int i = l;
 	// Loops until we have reached the desired lexicographical level
-	for(int i = l; i>0; i--)
+	for(i; i>0; i--)
 	{
 		base = stack[base + 1];
 	}
