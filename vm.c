@@ -39,6 +39,9 @@ void printList(instruction list[], int counter);
 // execution function to execute instructions
 void execute(instruction instruction, cpu *cpuList, int stack[]);
 
+// Function to find base l levels down
+int base(int l, int base, int stack[]);
+
 char INSTRUCTION[][4] = {"","LIT","OPR","LOD","STO","CAL","INC","JMP","JPC","SIO"};
 
 char OPR[][4] = {"RET","NEG","ADD","SUB","MUL","DIV","ODD","MOD","EQL","NEQ","LSS","LEQ","GTR","GEQ"};
@@ -140,6 +143,12 @@ void execute(instruction instruction, cpu *cpuList, int stack[])
 {
 	switch(instruction.op)
 	{
+		// 01 LIT 0 M
+		// Pushes M onto the stack
+		case 1:
+			cpuList->sp++;
+			stack[cpuList->sp] = instruction.m;
+			break;
 		// 02 OPR 0 M
 		// Arithmetic operations
 		case 2:
@@ -215,6 +224,28 @@ void execute(instruction instruction, cpu *cpuList, int stack[])
 			// Shouldn't hit this, but including it just in case.
 			default:
 				break;
+		// 03 LOD L M
+		// Loads value L levels down at M to the top of the stack
+		case 3:
+			cpuList->sp++;
+			stack[cpuList->sp] = stack[base(instruction.l,cpuList->bp,stack) + instruction.m];
+			break;
+		// 04 STO L M
+		// Stores the value at the top of the stack at M, L levels down
+		case 4:
+			stack[base(instruction.l,cpuList->bp,stack) + instruction.m] = stack[cpuList->sp];
+			cpuList->sp--;
+			break;
+		// 05 CAL L M
+		// Creates a new Activation Record and sets the program counter to M
+		case 5:
+			stack[cpuList->sp + 1] = 0;
+			stack[cpuList->sp + 2] = base(instruction.l,cpuList->bp,stack);
+			stack[cpuList->sp + 3] = cpuList->bp;
+			stack[cpuList->sp + 4] = cpuList->pc;
+			cpuList->bp = cpuList->sp + 1;
+			cpuList->pc = instruction.m;
+			break;
 		// 06 INC 0 M 
 		// Allocate M locals on stack
 		case 6:
@@ -254,6 +285,17 @@ void execute(instruction instruction, cpu *cpuList, int stack[])
 			}
 		
 	}
+}
+
+int base (int l, int base, int stack[])
+{
+	// Loops until we have reached the desired lexicographical level
+	for(int i = l; i>0; i--)
+	{
+		base = stack[base + 1];
+	}
+
+	return base;
 }
 
 void printInstruction(instruction ins)
