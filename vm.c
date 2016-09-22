@@ -37,7 +37,7 @@ void printInstruction(instruction ins);
 void printList(instruction list[], int counter);
 
 // Fucntion to print stack results
-void printStack(int stack[], cpu cpuList);
+void printStack(int stack[], cpu cpuList, int AR[], int sizeAR);
 
 // execution function to execute instructions
 int execute(instruction instruction, cpu *cpuList, int stack[]);
@@ -48,6 +48,8 @@ int base(int l, int base, int stack[]);
 char INSTRUCTION[][4] = {"","LIT","OPR","LOD","STO","CAL","INC","JMP","JPC","SIO"};
 
 char OPR[][4] = {"RET","NEG","ADD","SUB","MUL","DIV","ODD","MOD","EQL","NEQ","LSS","LEQ","GTR","GEQ"};
+
+char SIO[][4] = {"OUT","INP","HLT"};
 
 int main(int argc, char *argv[])
 {
@@ -84,24 +86,40 @@ int main(int argc, char *argv[])
     //Initial execution
     printf("\n");
     printf("Execution:\n");
-    printf("\t\t\tpc\tbp\tsp\tstack\n");
-    printf("\t\t\t%2d\t%2d\t%2d\n", cpuList.pc, cpuList.bp, cpuList.sp);
+    printf("                      pc   bp   sp   stack\n");
+    printf("                  %6d%5d%5d\n", cpuList.pc, cpuList.bp, cpuList.sp);
 
 	instruction ins;
-	int halt = 0;
-	while(!halt)
+	int condition = 2;
+	int AR[MAX_LEXI_LEVELS] = {0};
+	int currAR = 0;
+	// condition list:
+	// 0 halt
+	// 1 add one activation record
+	// -1 delete one activation record
+	while(condition)
 	{
 		// fetch Cycle:
 		cpuList.ir = cpuList.pc;
 		cpuList.pc++;
 		ins = instructionList[cpuList.ir];
 		// execution Cycle:
-		halt=execute(ins,&cpuList,stack);
-		// print current instruction and stack result
 		printf(" %2d  ",cpuList.ir);
 		printInstruction(ins);
-		printf("\t%2d\t%2d\t%2d\t", cpuList.pc, cpuList.bp, cpuList.sp);
-		printStack(stack,cpuList);
+		condition = execute(ins,&cpuList,stack);
+		if(condition == 1)
+		{
+			AR[currAR] = cpuList.bp;
+			currAR++;			
+		}
+		else if(condition == -1)
+		{
+			AR[currAR] = 0;
+			currAR--;
+		}		
+		// print current instruction and stack result		
+		printf("%6d%5d%5d   ", cpuList.pc, cpuList.bp, cpuList.sp);
+		printStack(stack,cpuList,AR,currAR);
 		puts("");
 	}
 
@@ -163,6 +181,7 @@ int execute(instruction instruction, cpu *cpuList, int stack[])
 					cpuList->sp = cpuList->bp - 1;
 					cpuList->pc = stack[cpuList->sp + 4];
 					cpuList->bp = stack[cpuList->sp + 3];
+					return -1;
 					break;
 				// 1 NEG
 				case 1:
@@ -253,6 +272,7 @@ int execute(instruction instruction, cpu *cpuList, int stack[])
 			stack[cpuList->sp + 4] = cpuList->pc;
 			cpuList->bp = cpuList->sp + 1;
 			cpuList->pc = instruction.m;
+			return 1;
 			break;
 		// 06 INC 0 M
 		// Allocate M locals on stack
@@ -282,21 +302,23 @@ int execute(instruction instruction, cpu *cpuList, int stack[])
 				case 0:
 					printf("%d",stack[cpuList->sp]);
 					cpuList->sp--;
+					break;
 				// System input
 				// Read in input from user and push it
 				case 1:
 					cpuList->sp++;
 					scanf("%d",stack+cpuList->sp);
+					break;
 				// Halt the machine
 				case 2:
-					return 1;
+					return 0;
 			}
 			break;
 		// Shouldn't hit this, but including it just in case.
 		default:
 			break;
 	}
-	return 0;
+	return 2;
 }
 
 int base (int l, int base, int stack[])
@@ -312,9 +334,9 @@ int base (int l, int base, int stack[])
 
 void printInstruction(instruction ins)
 {
-	// Halt instruction
-	if(ins.op == 9 && ins.m ==2)
-		printf("HLT          ");
+	// SIO instruction
+	if(ins.op == 9)
+		printf("%s          ", SIO[ins.m]);
 	// Arithmetic/logical instructions
 	else if(ins.op == 2)
 		printf("%s          ", OPR[ins.m]);
@@ -325,14 +347,17 @@ void printInstruction(instruction ins)
 		printf("%s  %3s %4d", INSTRUCTION[ins.op],"",ins.m);
 }
 
-void printStack(int stack[], cpu cpuList)
+void printStack(int stack[], cpu cpuList, int AR[], int sizeAR)
 {
 	int i = 0;
 	for(i=1;i<=cpuList.sp;i++)
 	{
-		if( i == cpuList.bp && cpuList.bp != 1)
-            printf("| ");
-
+		int j;
+		for(j=0;j<sizeAR;j++)
+		{
+			if(i == AR[j])
+				printf("| ");
+		}
 		printf("%d ",stack[i]);
 	}
 }
