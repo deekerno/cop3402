@@ -36,8 +36,11 @@ void printInstruction(instruction ins);
 //Function to print the results
 void printList(instruction list[], int counter);
 
+// Fucntion to print stack results
+void printStack(int stack[], cpu cpuList);
+
 // execution function to execute instructions
-void execute(instruction instruction, cpu *cpuList, int stack[]);
+int execute(instruction instruction, cpu *cpuList, int stack[]);
 
 // Function to find base l levels down
 int base(int l, int base, int stack[]);
@@ -81,27 +84,28 @@ int main(int argc, char *argv[])
     //Initial execution
     printf("\n");
     printf("Execution:\n");
-    printf("\t\t\t\tpc\tbp\tsp\tstack\n");
-    printf("\t\t\t\t%2d\t%2d\t\%2d\n", cpuList.pc, cpuList.bp, cpuList.sp);
+    printf("\t\t\tpc\tbp\tsp\tstack\n");
+    printf("\t\t\t%2d\t%2d\t%2d\n", cpuList.pc, cpuList.bp, cpuList.sp);
 
-    //Execution
-	
-	// demo for now
-	// change later	
-	int i;
-	for(i=0;i<instructionCount;i++)
+	instruction ins;
+	int halt = 0;
+	while(!halt)
 	{
-		printf(" %2d  ",i);
-		printInstruction(instructionList[i]);
+		// fetch Cycle:
+		cpuList.ir = cpuList.pc;
+		cpuList.pc++;
+		ins = instructionList[cpuList.ir];
+		// execution Cycle:
+		halt=execute(ins,&cpuList,stack);
+		// print current instruction and stack result
+		printf(" %2d  ",cpuList.ir);
+		printInstruction(ins);
+		printf("\t%2d\t%2d\t%2d\t", cpuList.pc, cpuList.bp, cpuList.sp);
+		printStack(stack,cpuList);
 		puts("");
-		execute(instructionList[i],&cpuList,stack);
 	}
-
-		
+	
     return 0;
-
-
-
 }
 
 int readFile(FILE* reader, instruction list[], int counter)
@@ -139,7 +143,7 @@ void printList(instruction list[], int counter)
     }
 }
 
-void execute(instruction instruction, cpu *cpuList, int stack[])
+int execute(instruction instruction, cpu *cpuList, int stack[])
 {
 	switch(instruction.op)
 	{
@@ -152,78 +156,82 @@ void execute(instruction instruction, cpu *cpuList, int stack[])
 		// 02 OPR 0 M
 		// Arithmetic operations
 		case 2:
-			// 0 RET
-			case 0:
-				cpuList->sp = cpuList->bp - 1;
-				cpuList->pc = stack[cpuList->sp + 4];
-				cpuList->bp = stack[cpuList->sp + 3];
-				break;
-			// 1 NEG
-			case 1:
-				stack[cpuList->sp] *= -1;
-				break;
-			// 2 ADD
-			case 2:
-				cpuList->sp -= 1;
-				stack[cpuList->sp] += stack[cpuList->sp + 1];
-				break;
-			// 3 SUB
-			case 3:
-				cpuList->sp -= 1;
-				stack[cpuList->sp] -= stack[cpuList->sp + 1];
-				break;
-			// 4 MUL
-			case 4:
-				cpuList->sp -= 1;
-				stack[cpuList->sp] *= stack[cpuList->sp + 1];
-				break;
-			// 5 DIV
-			case 5:
-				cpuList->sp -= 1;
-				stack[cpuList->sp] /= stack[cpuList->sp + 1];
-				break;
-			// 6 ODD
-			case 6:
-				stack[cpuList->sp] = stack[cpuList->sp] % 2;
-				break;
-			// 7 MOD
-			case 7:
-				cpuList->sp -= 1;
-				stack[cpuList->sp] = stack[cpuList->sp] % stack[cpuList->sp + 1];
-				break;
-			// 8 EQL
-			case 8:
-				cpuList->sp -= 1;
-				stack[cpuList->sp] = stack[cpuList->sp] == stack[cpuList->sp + 1] ? 1 : 0;
-				break;
-			// 9 NEQ
-			case 9:
-				cpuList->sp -= 1;
-				stack[cpuList->sp] = stack[cpuList->sp] != stack[cpuList->sp + 1] ? 1 : 0;
-				break;
-			// 10 LSS
-			case 10:
-				cpuList->sp -= 1;
-				stack[cpuList->sp] = stack[cpuList->sp] < stack[cpuList->sp + 1] ? 1 : 0;
-				break;
-			// 11 LEQ
-			case 11:
-				cpuList->sp -= 1;
-				stack[cpuList->sp] = stack[cpuList->sp] <= stack[cpuList->sp + 1] ? 1 : 0;
-				break;
-			// 12 GTR
-			case 12:
-				cpuList->sp -= 1;
-				stack[cpuList->sp] = stack[cpuList->sp] > stack[cpuList->sp + 1] ? 1 : 0;
-				break;
-			// 13 GEQ
-			case 13:
-				cpuList->sp -= 1;
-				stack[cpuList->sp] = stack[cpuList->sp] >= stack[cpuList->sp + 1] ? 1 : 0;
-				break;
-			// Shouldn't hit this, but including it just in case.
-			default:
-				break;
+			switch(instruction.m)
+			{
+				// 0 RET
+				case 0:
+					cpuList->sp = cpuList->bp - 1;
+					cpuList->pc = stack[cpuList->sp + 4];
+					cpuList->bp = stack[cpuList->sp + 3];
+					break;
+				// 1 NEG
+				case 1:
+					stack[cpuList->sp] *= -1;
+					break;
+				// 2 ADD
+				case 2:
+					cpuList->sp -= 1;
+					stack[cpuList->sp] += stack[cpuList->sp + 1];
+					break;
+				// 3 SUB
+				case 3:
+					cpuList->sp -= 1;
+					stack[cpuList->sp] -= stack[cpuList->sp + 1];
+					break;
+				// 4 MUL
+				case 4:
+					cpuList->sp -= 1;
+					stack[cpuList->sp] *= stack[cpuList->sp + 1];
+					break;
+				// 5 DIV
+				case 5:
+					cpuList->sp -= 1;
+					stack[cpuList->sp] /= stack[cpuList->sp + 1];
+					break;
+				// 6 ODD
+				case 6:
+					stack[cpuList->sp] = stack[cpuList->sp] % 2;
+					break;
+				// 7 MOD
+				case 7:
+					cpuList->sp -= 1;
+					stack[cpuList->sp] = stack[cpuList->sp] % stack[cpuList->sp + 1];
+					break;
+				// 8 EQL
+				case 8:
+					cpuList->sp -= 1;
+					stack[cpuList->sp] = stack[cpuList->sp] == stack[cpuList->sp + 1] ? 1 : 0;
+					break;
+				// 9 NEQ
+				case 9:
+					cpuList->sp -= 1;
+					stack[cpuList->sp] = stack[cpuList->sp] != stack[cpuList->sp + 1] ? 1 : 0;
+					break;
+				// 10 LSS
+				case 10:
+					cpuList->sp -= 1;
+					stack[cpuList->sp] = stack[cpuList->sp] < stack[cpuList->sp + 1] ? 1 : 0;
+					break;
+				// 11 LEQ
+				case 11:
+					cpuList->sp -= 1;
+					stack[cpuList->sp] = stack[cpuList->sp] <= stack[cpuList->sp + 1] ? 1 : 0;
+					break;
+				// 12 GTR
+				case 12:
+					cpuList->sp -= 1;
+					stack[cpuList->sp] = stack[cpuList->sp] > stack[cpuList->sp + 1] ? 1 : 0;
+					break;
+				// 13 GEQ
+				case 13:
+					cpuList->sp -= 1;
+					stack[cpuList->sp] = stack[cpuList->sp] >= stack[cpuList->sp + 1] ? 1 : 0;
+					break;
+				// Shouldn't hit this, but including it just in case.
+				default:
+					break;
+			}
+			break;
 		// 03 LOD L M
 		// Loads value L levels down at M to the top of the stack
 		case 3:
@@ -281,10 +289,14 @@ void execute(instruction instruction, cpu *cpuList, int stack[])
 					scanf("%d",stack+cpuList->sp);
 				// Halt the machine
 				case 2:
-					exit(0);
+					return 1;
 			}
-		
+			break;
+		// Shouldn't hit this, but including it just in case.
+		default:
+			break;
 	}
+	return 0;
 }
 
 int base (int l, int base, int stack[])
@@ -302,13 +314,22 @@ void printInstruction(instruction ins)
 {
 	// Halt instruction
 	if(ins.op == 9 && ins.m ==2)
-		printf("HLT");
+		printf("HLT          ");
 	// Arithmetic/logical instructions
 	else if(ins.op == 2)
-		printf("%s", OPR[ins.m]);
+		printf("%s          ", OPR[ins.m]);
 	// instructions that need to display level
 	else if(ins.op == 3 || ins.op == 4 || ins.op == 5)
 		printf("%s  %3d %4d", INSTRUCTION[ins.op],ins.l,ins.m);
 	else
 		printf("%s  %3s %4d", INSTRUCTION[ins.op],"",ins.m);	
+}
+
+void printStack(int stack[], cpu cpuList)
+{
+	int i = 0;
+	for(i=1;i<=cpuList.sp;i++)
+	{
+		printf("%d ",stack[i]);
+	}
 }
