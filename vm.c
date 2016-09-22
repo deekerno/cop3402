@@ -128,8 +128,6 @@ int main(int argc, char *argv[])
 
 int readFile(FILE* reader, instruction list[], int counter)
 {
-
-
     //Continue reading the file until there's nothing left
     while(!feof(reader))
     {
