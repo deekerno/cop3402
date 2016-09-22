@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
 		printStack(stack,cpuList);
 		puts("");
 	}
-	
+
     return 0;
 }
 
@@ -254,7 +254,7 @@ int execute(instruction instruction, cpu *cpuList, int stack[])
 			cpuList->bp = cpuList->sp + 1;
 			cpuList->pc = instruction.m;
 			break;
-		// 06 INC 0 M 
+		// 06 INC 0 M
 		// Allocate M locals on stack
 		case 6:
 			cpuList->sp += instruction.m;
@@ -322,7 +322,7 @@ void printInstruction(instruction ins)
 	else if(ins.op == 3 || ins.op == 4 || ins.op == 5)
 		printf("%s  %3d %4d", INSTRUCTION[ins.op],ins.l,ins.m);
 	else
-		printf("%s  %3s %4d", INSTRUCTION[ins.op],"",ins.m);	
+		printf("%s  %3s %4d", INSTRUCTION[ins.op],"",ins.m);
 }
 
 void printStack(int stack[], cpu cpuList)
@@ -330,6 +330,9 @@ void printStack(int stack[], cpu cpuList)
 	int i = 0;
 	for(i=1;i<=cpuList.sp;i++)
 	{
+		if( i == cpuList.bp && cpuList.bp != 1)
+            printf("| ");
+
 		printf("%d ",stack[i]);
 	}
 }
