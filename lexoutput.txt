@@ -1,0 +1,41 @@
+
+source code:
+------------
+var x, y;
+begin
+  x := 3;       /* This is := a % comment. */ x := 4;
+  x := y + 56;
+end.
+
+source code without comments:
+-----------------------------
+var x, y;
+begin
+  x := 3;                                     x := 4;
+  x := y + 56;
+end.
+
+tokens:
+-------
+var          29
+x            2
+,            17
+y            2
+;            18
+begin        21
+x            2
+:=           20
+3            3
+;            18
+x            2
+:=           20
+4            3
+;            18
+x            2
+:=           20
+y            2
++            4
+56           3
+;            18
+end          22
+.            19
