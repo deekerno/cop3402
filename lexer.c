@@ -98,7 +98,16 @@ char* removeComment(char* sourceCode)
                 fprintf(stderr,"close comment symnol */ occurrs before open comment symbol /*\n");
                 exit(1);
             }
-            memset(open,' ',strlen(open)-strlen(close)+2);
+            // memset(open,' ',strlen(open)-strlen(close)+2);
+            // replace all character in comment with space character
+            // except new line character
+            int size = strlen(open)-strlen(close)+2;
+            int i;
+            for(i=0;i<size;i++)
+            {
+                if(open[i] != '\n')
+                    open[i] = ' ';
+            }
         }
         else
         {
