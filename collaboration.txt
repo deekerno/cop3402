@@ -9,8 +9,9 @@ deCurnou
 - 02 OPR function
 
 Hoang
-- Fetch function and all its details
-- Added function to print pipes after AR
+- Fetch function and all its details - Project 0
+- Added function to print pipes after AR - Project 0
+- ADded function to store words, numbers, and symbols to link list - Project 1
 
 Ma
 - INC, JMP, JPC, SIO functions
