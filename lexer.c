@@ -79,8 +79,8 @@ char* readInput(const char* fileName)
 char* removeComment(char* sourceCode)
 {
     // make a copy of source code
-    char *raw = (char*)malloc(strlen(sourceCode));
-    memcpy(raw,sourceCode,strlen(sourceCode));
+    char *raw = (char*)malloc(strlen(sourceCode)+1);
+    strncpy(raw,sourceCode,strlen(sourceCode)+1);
 
     if(strstr(raw,"*/") && !strstr(raw,"/*"))
     {
@@ -143,24 +143,41 @@ void printTable(char *text);
 
 int main(int argc, char *argv[])
 {
-    if (argc != 2) {
-        fprintf(stderr, "usage: ./lextest filename\n");
+    int clean = 0;
+    int source = 0;
+    if(argc < 2) 
+    {
+        fprintf(stderr, "usage: ./lexer filename\n"); 
         exit(1);
     }
-
-    char *sourceCode = readInput(argv[1]);
+    
+    int i = 0;
+    for(i = 1; i < argc - 1; i++)
+    {
+        if(strcmp(argv[i],"--source") == 0)
+            source = 1;
+        else if(strcmp(argv[i],"--clean") == 0)
+            clean = 1;
+        else
+        {
+            fprintf(stderr,"unknown argument\n");
+            exit(1);
+        }
+        
+    }
+    
+    char *sourceCode = readInput(argv[argc-1]);
     char *raw = removeComment(sourceCode);
-    printf("source code:\n------------\n%s",sourceCode);
-    printf("\nsource code without comments:\n-----------------------------\n%s",raw);
-
-    free(sourceCode);
-    free(raw);
+    
+    if(source)
+        printf("source code:\n------------\n%s\n",sourceCode);
+    if(clean)
+        printf("source code without comments:\n-----------------------------\n%s\n",raw);
 
 
     //Variables
     int c;
     char character;
-    int i = 0;
 
     node *front, *end;
     front = end= createNode();
