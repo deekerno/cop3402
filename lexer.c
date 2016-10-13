@@ -15,12 +15,13 @@
 
 
 typedef enum token {
-  nulsym = 1, identsym, numbersym, plussym, minussym,
-  multsym, slashsym, oddsym, eqsym, neqsym, lessym, leqsym,
-  gtrsym, geqsym, lparentsym, rparentsym, commasym, semicolonsym,
-  periodsym, becomessym, beginsym, endsym, ifsym, thensym,
-  whilesym, dosym, callsym, constsym, varsym, procsym, writesym,
-  readsym , elsesym
+  nulsym = 1, identsym = 2, numbersym = 3, plussym = 4, minussym = 5,
+  multsym = 6, slashsym = 7, oddsym = 8, eqsym = 9, neqsym = 10, lessym = 11, 
+  leqsym = 12, gtrsym = 13, geqsym = 14, lparentsym = 15, rparentsym = 16, 
+  commasym = 17, semicolonsym = 18, periodsym = 19, becomessym = 20, 
+  beginsym = 21, endsym = 22, ifsym = 23, thensym = 24, whilesym = 25, 
+  dosym = 26, callsym = 27, constsym = 28, varsym = 29, procsym = 30,
+  writesym = 31, readsym = 32 , elsesym = 33
 } token_type;
 
 typedef struct node
@@ -145,6 +146,7 @@ int main(int argc, char *argv[])
 {
     int clean = 0;
     int source = 0;
+
     if(argc < 2) 
     {
         fprintf(stderr, "usage: ./lexer filename\n"); 
@@ -213,11 +215,7 @@ int main(int argc, char *argv[])
             c = fgetc(input);
         }
 
-
-
     }
-
-
 
     //Spacing
     printf("\n");
@@ -231,8 +229,6 @@ int main(int argc, char *argv[])
     {
         printTable(front->word);
     }
-
-
 
 	return 0;
 }
@@ -503,7 +499,82 @@ node *other(char firstSymbol, node *end, FILE *input)
     return end->next;
 }
 
+// Prints tokens and corresponding values
+
 void printTable(char *text)
 {
+    printf("%s\t", text);
 
+        if(strcmp(text,"")==0)
+            printf("%d\n", nulsym);
+        else if(strcmp(text,"+")==0)
+            printf("%d\n", plussym);
+        else if(strcmp(text,"-")==0)
+            printf("%d\n", minussym);
+        else if(strcmp(text,"*")==0)
+            printf("%d\n", multsym);
+        else if(strcmp(text,"/")==0)
+            printf("%d\n", slashsym);
+        else if(strcmp(text,"=")==0)
+            printf("%d\n", eqsym);
+        else if(strcmp(text,"<>")==0)
+            printf("%d\n", neqsym);
+        else if(strcmp(text,"<")==0)
+            printf("%d\n", lessym);
+        else if(strcmp(text,"<=")==0)
+            printf("%d\n", leqsym);
+        else if(strcmp(text,">")==0)
+            printf("%d\n", gtrsym);
+        else if(strcmp(text,">=")==0)
+            printf("%d\n", geqsym);
+        else if(strcmp(text,"(")==0)
+            printf("%d\n", lparentsym);
+        else if(strcmp(text,")")==0)
+            printf("%d\n", rparentsym);
+        else if(strcmp(text,",")==0)
+            printf("%d\n", commasym);
+        else if(strcmp(text,";")==0)
+            printf("%d\n", semicolonsym);
+        else if(strcmp(text,".")==0)
+            printf("%d\n", periodsym);
+        else if(strcmp(text,":=")==0)
+            printf("%d\n", becomessym);
+        else if(strcmp(text,"begin")==0)
+            printf("%d\n", beginsym);
+        else if(strcmp(text,"end")==0)
+            printf("%d\n", endsym);
+        else if(strcmp(text,"if")==0)
+            printf("%d\n", ifsym);
+        else if(strcmp(text,"then")==0)
+            printf("%d\n", thensym);
+        else if(strcmp(text,"while")==0)
+            printf("%d\n", whilesym);
+        else if(strcmp(text,"do")==0)
+            printf("%d\n", dosym);
+        else if(strcmp(text,"call")==0)
+            printf("%d\n", callsym);
+        else if(strcmp(text,"const")==0)
+            printf("%d\n", constsym);
+        else if(strcmp(text,"var")==0)
+            printf("%d\n", varsym);
+        else if(strcmp(text,"procedure")==0)
+            printf("%d\n", procsym);
+        else if(strcmp(text,"write")==0)
+            printf("%d\n", writesym);
+        else if(strcmp(text,"read")==0)
+            printf("%d\n", readsym);
+        else if(strcmp(text,"else")==0)
+            printf("%d\n", elsesym);
+        else    
+            {
+                if(atoi(text)==0)
+                {
+                    if(strlen(text)<=13)
+                        printf("%d\n", identsym);
+                    else
+                        printf("Identifier is too long.");
+                }
+                else
+                    printf("%d\n", numbersym);
+            }
 }
