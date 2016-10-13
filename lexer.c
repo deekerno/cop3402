@@ -575,6 +575,11 @@ void printTable(char *text)
                         printf("Identifier is too long.");
                 }
                 else
-                    printf("%d\n", numbersym);
+                {
+                    if(atoi(text)>65535)
+                        printf("The number is too big.\n");
+                    else
+                        printf("%d\n", numbersym);
+                }
             }
 }
