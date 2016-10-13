@@ -30,17 +30,103 @@ typedef struct node
     struct node *next;
 } node;
 
-const char *keyword[] = {"null", "begin", "call", "const", "do", "else", "end", "if",
-"odd", "procedure", "read", "then", "var", "while", "write"};
 
-const int keyword_type[] = {nulsym, beginsym, callsym, constsym, dosym, elsesym, endsym,
-ifsym, oddsym, procsym, readsym, thensym, varsym, whilesym, writesym};
+char* readInput(const char* fileName);
+char* removeComment(char* sourceCode);
+node *createNode();
+node *letter(char letter, node *end, FILE *input);
+node *number(char ldigit, node *end, FILE *input);
+node *other(char firstSymbol, node *end, FILE *input);
+void printTable(char *text);
 
-// arithmetic operators
-// comparison operators (note that = is also used to assign the value to a constant)
-// assignment and some special symbols
-const char *symbols[] = {"+","-","*","/","=","<>","<=","<",">",">=",":=",
-",",";",".","(",")"};
+
+int main(int argc, char *argv[])
+{
+    int clean = 0;
+    int source = 0;
+
+    if(argc < 2) 
+    {
+        fprintf(stderr, "usage: ./lexer filename\n"); 
+        exit(1);
+    }
+    
+    int i = 0;
+    for(i = 1; i < argc - 1; i++)
+    {
+        if(strcmp(argv[i],"--source") == 0)
+            source = 1;
+        else if(strcmp(argv[i],"--clean") == 0)
+            clean = 1;
+        else
+        {
+            fprintf(stderr,"unknown argument\n");
+            exit(1);
+        }
+        
+    }
+    
+    char *sourceCode = readInput(argv[argc-1]);
+    char *raw = removeComment(sourceCode);
+    
+    if(source)
+        printf("source code:\n------------\n%s\n",sourceCode);
+    if(clean)
+        printf("source code without comments:\n-----------------------------\n%s\n",raw);
+
+
+    //Variables
+    int c;
+    char character;
+
+    node *front, *end;
+    front = end= createNode();
+
+    FILE *input = fopen(argv[argc-1], "r");
+
+    //Get very first character in input file
+    c = fgetc(input);
+
+    //Depending on what the character c is depends on what case should be implemented
+    while(c != EOF)
+    {
+        if(isalpha(c))
+        {
+            character = c;
+            end = letter(character, end, input);
+            c = fgetc(input);
+        }
+
+        else if(isdigit(c))
+        {
+            end = number(c, end, input);
+            c = fgetc(input);
+        }
+        else if(ispunct(c))
+        {
+            character = c;
+            end = other(character, end, input);
+            c = fgetc(input);
+        }
+        else
+        {
+            c = fgetc(input);
+        }
+
+    }
+
+    //Heading for token table
+    printf("tokens:\n");
+    printf("-------\n");
+
+    //Print out the token table
+    for(; front->next != NULL; front = front->next)
+    {
+        printTable(front->word);
+    }
+
+	return 0;
+}
 
 
 // read input file
@@ -131,106 +217,6 @@ char* removeComment(char* sourceCode)
         }
     }
     return raw;
-}
-
-node *createNode();
-node *letter(char letter, node *end, FILE *input);
-node *number(char ldigit, node *end, FILE *input);
-node *other(char firstSymbol, node *end, FILE *input);
-void printTable(char *text);
-
-
-
-
-int main(int argc, char *argv[])
-{
-    int clean = 0;
-    int source = 0;
-
-    if(argc < 2) 
-    {
-        fprintf(stderr, "usage: ./lexer filename\n"); 
-        exit(1);
-    }
-    
-    int i = 0;
-    for(i = 1; i < argc - 1; i++)
-    {
-        if(strcmp(argv[i],"--source") == 0)
-            source = 1;
-        else if(strcmp(argv[i],"--clean") == 0)
-            clean = 1;
-        else
-        {
-            fprintf(stderr,"unknown argument\n");
-            exit(1);
-        }
-        
-    }
-    
-    char *sourceCode = readInput(argv[argc-1]);
-    char *raw = removeComment(sourceCode);
-    
-    if(source)
-        printf("source code:\n------------\n%s\n",sourceCode);
-    if(clean)
-        printf("source code without comments:\n-----------------------------\n%s\n",raw);
-
-
-    //Variables
-    int c;
-    char character;
-
-    node *front, *end;
-    front = end= createNode();
-
-    FILE *input = fopen(argv[1], "r");
-
-    //Get very first character in input file
-    c = fgetc(input);
-
-    //Depending on what the character c is depends on what case should be implemented
-    while(c != EOF)
-    {
-        if(isalpha(c))
-        {
-            character = c;
-            end = letter(character, end, input);
-            c = fgetc(input);
-        }
-
-        else if(isdigit(c))
-        {
-            end = number(c, end, input);
-            c = fgetc(input);
-        }
-        else if(ispunct(c))
-        {
-            character = c;
-            end = other(character, end, input);
-            c = fgetc(input);
-        }
-        else
-        {
-            c = fgetc(input);
-        }
-
-    }
-
-    //Spacing
-    printf("\n");
-
-    //Heading for token table
-    printf("tokens:\n");
-    printf("-------\n");
-
-    //Print out the token table
-    for(; front->next != NULL; front = front->next)
-    {
-        printTable(front->word);
-    }
-
-	return 0;
 }
 
 
