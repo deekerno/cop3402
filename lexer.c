@@ -562,8 +562,8 @@ void printTable(char *text)
                 }
                 else
                 {
-                    if(atoi(text)>65535)
-                        printf("The number is too big.\n");
+                    if(atoi(text)>65535||atoi(text)<0)
+                        printf("The number is out of range.\n");
                     else
                         printf("%d\n", numbersym);
                 }
