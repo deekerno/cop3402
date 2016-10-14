@@ -6,18 +6,14 @@
 
 deCurnou
 - Initial struct and file setup
-- 02 OPR function
 
 Hoang
-- Fetch function and all its details - Project 0
-- Added function to print pipes after AR - Project 0
-- ADded function to store words, numbers, and symbols to link list - Project 1
+- Created functions for a linked list to store all words, numbers, and symbols (createNode,letter,number,other)
 
 Ma
-- INC, JMP, JPC, SIO functions
-- Made sure all given test cases passed
+- Created the readInput and removeComment functions, and the --source and --clean constraints.
 
 Rigdon
-- LIT, LOD, STO, CAL, and base functions
+- Created printTable function
 
 Commit log available upon request.
