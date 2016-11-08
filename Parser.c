@@ -24,7 +24,7 @@ typedef struct symbol
     int addr;
 } symbol;
 
-//Token type enum
+//token type enum
 typedef enum
 {
      nulsym = 1, identSym, numberSym, plusSym, minusSym,
@@ -191,7 +191,7 @@ void block(symbol *symbolList)
 
 
     //Call statement
-    statement(symbolList);
+    statement(symbolList);;
 }
 
 
@@ -203,85 +203,92 @@ void getToken(symbol *symbolList)
 }
 
 
-//Error function, prints based on which error occurs
+//error function, prints based on which error occurs
 void error(int value)
 {
     switch(value)
     {
         case 1:
-            printf("Error 1: Use = instead of :=.\n");
+            printf("error 1: Use = instead of :=.\n");
             break;
         case 2:
-            printf("Error 2: = must be followed by a number.\n");
+            printf("error 2: = must be followed by a number.\n");
             break;
         case 3:
-            printf("Error 3: Identifier myst be followed by =.\n");
+            printf("error 3: Identifier myst be followed by =.\n");
             break;
         case 4:
-            printf("Error 4: Const, Var, Procedure must be followed by an identifier.\n");
+            printf("error 4: Const, Var, Procedure must be followed by an identifier.\n");
             break;
         case 5:
-            printf("Error 5: Semicolon or comma missing.\n");
+            printf("error 5: Semicolon or comma missing.\n");
             break;
         case 6:
-            printf("Error 6: Incorrect symbol after procedure declaration.\n");
+            printf("error 6: Incorrect symbol after procedure declaration.\n");
             break;
         case 7:
-            printf("Error 7: Statement expected.\n");
+            printf("error 7: Statement expected.\n");
             break;
         case 8:
-            printf("Error 8: Incorrect symbol after statement part in block.\n");
+            printf("error 8: Incorrect symbol after statement part in block.\n");
             break;
         case 9:
-            printf("Error 9: Period expected.\n");
+            printf("error 9: Period expected.\n");
             break;
         case 10:
-            printf("Error 10: Semicolon between statements missing.\n");
+            printf("error 10: Semicolon between statements missing.\n");
             break;
         case 11:
-            printf("Error 11: Undeclared identifier.\n");
+            printf("error 11: Undeclared identifier.\n");
             break;
         case 12:
-            printf("Error 12: Assignment to constant or precedure not allowed.\n");
+            printf("error 12: Assignment to constant or precedure not allowed.\n");
             break;
         case 13:
-            printf("Error 13: Assignment operator expected.\n");
+            printf("error 13: Assignment operator expected.\n");
             break;
         case 14:
-            printf("Error 14: Call must be folloqws by an identifier.\n");
+            printf("error 14: Call must be folloqws by an identifier.\n");
             break;
         case 15:
-            printf("Error 15: Call of a constant or variable is meaningless.\n");
+            printf("error 15: Call of a constant or variable is meaningless.\n");
             break;
         case 16:
-            printf("Error 16: Then expected.\n");
+            printf("error 16: Then expected.\n");
             break;
         case 17:
-            printf("Error 17: Semicolon or } expected.\n");
+            printf("error 17: Semicolon or } expected.\n");
             break;
         case 18:
-            printf("Error 18: Do expected.\n");
+            printf("error 18: Do expected.\n");
             break;
         case 19:
-            printf("Error 19: Incorrect symbol following statement.\n");
+            printf("error 19: Incorrect symbol following statement.\n");
             break;
         case 20:
-            printf("Error 20: Relational operator expected.\n");
+            printf("error 20: Relational operator expected.\n");
             break;
         case 21:
-            printf("Error 21: Expression must not contain a procedure identifier.\n");
+            printf("error 21: Expression must not contain a procedure identifier.\n");
             break;
         case 22:
-            printf("Error 22: Right parenthesis is missing.\n");
+            printf("error 22: Right parenthesis is missing.\n");
             break;
         case 23:
-            printf("Error 23: Preceding factor cannot begin with this symbol.\n");
+            printf("error 23: Preceding factor cannot begin with this symbol.\n");
             break;
         case 24:
             printf("error 24: Expression cannot bewin with this symbol.\n");
             break;
-
-
+        case 25:
+            printf("error 25: end expected.\n");
+            break;
+        case 26:
+            printf("error 26: read must be followed by identifier.\n");
+            break;
+        case 27:
+            printf("error 27: write must be followed by identifier.\n");
+            break;
 
     }
 
@@ -442,3 +449,121 @@ int isConstant(char *name)
 }
 
 
+void statement(symbol *symbolList)
+{
+    if(token == identsym)
+    {
+        getToken(symbolList);
+        if(token != becomessym)
+            error(13);
+        getToken(symbolList);
+        expression(symbolList);
+    }
+    else if(token == callsym)
+    {
+        getToken(symbolList);
+        if(token != identsym)
+            error(14);
+        getToken(symbolList);
+    }
+    else if(token == beginsym)
+    {
+        getToken(symbolList);
+        statement(symbolList);
+        while(token == semicolonsym)
+        {
+            getToken(symbolList);
+            statement(symbolList);
+        }
+        if(token != endsym)
+            error(25);
+        getToken(symbolList);
+    }
+    else if(token == ifsym)
+    {
+        getToken(symbolList);
+        condtion(symbolList);
+        if(token != thensym)
+            error(16);
+        getToken(symbolList);
+        statement(symbolList);
+    }
+    else if(token == whilesym)
+    {
+        getToken(symbolList);
+        condtion(symbolList);
+        if(token != dosym)
+            error(18);
+        getToken(symbolList);
+        statement(symbolList);
+    }
+    else if(token == readsym)
+    {
+        getToken(symbolList);
+        if(token != identsym)
+            error(26);
+        getToken(symbolList);
+    }
+    else if(token == writesym)
+    {
+        getToken(symbolList);
+        if(token != identsym)
+            error(27);
+        getToken(symbolList);        
+    }
+}
+
+void condtion(symbol *symbolList)
+{
+    if(token == oddsym)
+    {
+        getToken(symbolList);
+        expression(symbolList);
+    }
+    else
+    {
+        expression(symbolList);
+        if(token < eqsym || token > geqsym )
+            error(20);
+        getToken(symbolList);
+        expression(symbolList);
+    }
+}
+
+void expression(symbol *symbolList)
+{
+    if(token == plussym || token == minussym)
+        getToken(symbolList);
+    term(symbolList);
+    while(token == plussym || token == minussym)
+    {
+        getToken(symbolList);
+        term(symbolList);
+    }
+}
+
+void term(symbol *symbolList)
+{
+    factor(symbolList);
+    while(token == multsym || token == slashsym)
+    {
+        getToken(symbolList);
+        factor(symbolList);
+    }
+}
+
+void factor(symbol *symbolList)
+{
+    if(token == identsym || token == numbersym)
+        getToken(symbolList);
+    else if(token = lparentsym)
+    {
+        getToken(symbolList);
+        expression(symbolList);
+        if(token != rparentsym)
+            error(22);
+        getToken(symbolList);
+    }
+    else
+        error(24);
+}
