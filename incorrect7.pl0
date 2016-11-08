@@ -1,0 +1,9 @@
+//encounters error 16
+var a, b;
+begin
+  a = 7;
+  if a > 5
+    b := a - 3;
+  else
+    b := a + 3;
+end.
