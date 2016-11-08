@@ -1,0 +1,10 @@
+//encounters error 26
+var a, b;
+begin
+  read ;
+  a := 7;
+  if a > 5 then
+    b := a - 3;
+  else
+    b := a + 3;
+end.
