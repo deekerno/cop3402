@@ -1,0 +1,8 @@
+const t=2;
+var a, b;
+begin
+  read a;
+  read b;
+  while b < a do
+    b := a*t;
+end.
