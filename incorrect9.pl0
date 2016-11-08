@@ -1,0 +1,8 @@
+//encounters error 25
+var a, b;
+begin
+  a := 7;
+  if a > 5 then
+    b := a - 3;
+  else
+    b := a + 3;
