@@ -1,0 +1,12 @@
+var a, b, c;
+begin
+  read a;
+  read b;
+  read c;
+  if a > b then
+    write c;
+  if b > c then
+    write a;
+  if c > a then
+    write b;
+end.
