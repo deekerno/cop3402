@@ -74,7 +74,7 @@ void expression(symbol *symbolList);
 void condition(symbol *symbolList);
 void term(symbol *symbolList);
 void factor(symbol *symbolList);
-
+int isVar(char *name);
 
 void getToken(symbol *symbolList);
 void makeSymbol(symbol *symbolList);
