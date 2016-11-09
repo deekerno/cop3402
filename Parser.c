@@ -479,9 +479,18 @@ void statement(symbol *symbolList)
 
     if(token == identSym)
     {
+        if(!isVar(symbolList[numToken-1].name))
+        {
+
+            if(!isConstant(symbolList[numToken-1].name))
+                error(12);
+            else
+                error(11);
+        }
+
         getToken(symbolList);
         if(token != becomesSym)
-            error(13);
+            error(19);
 
         temp = m1;
         getToken(symbolList);
@@ -494,7 +503,7 @@ void statement(symbol *symbolList)
     {
         getToken(symbolList);
         if(token != identSym)
-            error(14);
+            error(23);
 
         emit(CAL, 0, m1);
 
@@ -553,7 +562,7 @@ void statement(symbol *symbolList)
         tempLine[1] = addLine();
 
         if(token != doSym)
-            error(18);
+            error(12);
         getToken(symbolList);
         statement(symbolList);
 
