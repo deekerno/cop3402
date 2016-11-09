@@ -13,6 +13,7 @@
 #define MAX_TABLE_SIZE 100
 #define MAX_CODE_LENGTH 500
 #define MAX_LEXI_LEVELS 3
+#define SIZE 500
 
 //Struct for a symbol
 typedef struct symbol
@@ -46,7 +47,7 @@ typedef struct instruction
 //OP codes
 typedef enum
 {
-    LIT = 1, OPR, LOD, STO, CAL, INC, JMP, JPC, SIO1, SIO2, SIO3
+    LIT = 1, OPR, LOD, STO, CAL, INC, JMP, JPC, SIO
 } op_code;
 
 //Operator codes
@@ -68,25 +69,42 @@ symbol symbolTable[MAX_TABLE_SIZE];
 //Functions
 void program(symbol *symbolList);
 void block(symbol *symbolList);
+void statement(symbol *symbolList);
+void expression(symbol *symbolList);
+void condition(symbol *symbolList);
+void term(symbol *symbolList);
+void factor(symbol *symbolList);
 
 
 void getToken(symbol *symbolList);
 void makeSymbol(symbol *symbolList);
 void error(int value);
 
+void printCode(FILE *out);
+void emit(int op, int l, int m);
+void getOldinstruction(int index, int code, int m);
+int addLine();
+int getLine();
 
-symbol *createList();
+symbol *createList(FILE *in);
 
 
-int main()
+int main(int argc, char *argv[])
 {
+    FILE *in = fopen(argv[1], "r");
+    FILE *out = fopen(argv[2], "w");
+
     //Create new symbol list at the start
-    symbol *symbolList = createList();
+    symbol *symbolList = createList(in);
 
     makeSymbol(symbolList);
 
     //Start scanner
     program(symbolList);
+
+    //Generate the m code
+    printCode(out);
+
 
     return 0;
 }
@@ -104,6 +122,8 @@ void program(symbol *symbolList)
 
     else
         printf("No errors, program is syntactically correct.\n");
+
+    emit(SIO, 0, 2);
 
 
 }
@@ -189,6 +209,9 @@ void block(symbol *symbolList)
         } while (token == procSym);
     }
 
+
+    //Add m code
+    emit(INC, 0, numVars);
 
     //Call statement
     statement(symbolList);;
@@ -350,11 +373,11 @@ void makeSymbol(symbol *symbolList)
 }
 
 
-symbol *createList()
+symbol *createList(FILE *in)
 {
     int i = 0;
     int x = 1;
-    FILE *in = fopen("lexemelist.txt", "r");
+
     symbol *symbolList = malloc(sizeof(symbol) *1000);
 
     int c = 0;
@@ -451,119 +474,332 @@ int isConstant(char *name)
 
 void statement(symbol *symbolList)
 {
-    if(token == identsym)
+    int temp = 0;
+    int tempLine[2];
+
+    if(token == identSym)
     {
         getToken(symbolList);
-        if(token != becomessym)
+        if(token != becomesSym)
             error(13);
+
+        temp = m1;
         getToken(symbolList);
         expression(symbolList);
+
+        emit(STO, 0, temp);
+
     }
-    else if(token == callsym)
+    else if(token == callSym)
     {
         getToken(symbolList);
-        if(token != identsym)
+        if(token != identSym)
             error(14);
+
+        emit(CAL, 0, m1);
+
         getToken(symbolList);
     }
-    else if(token == beginsym)
+    else if(token == beginSym)
     {
         getToken(symbolList);
         statement(symbolList);
-        while(token == semicolonsym)
+        while(token == semicolonSym)
         {
             getToken(symbolList);
             statement(symbolList);
         }
-        if(token != endsym)
+        if(token != endSym)
             error(25);
         getToken(symbolList);
     }
-    else if(token == ifsym)
+    else if(token == ifSym)
     {
+        tempLine[1] = 0;
+
         getToken(symbolList);
-        condtion(symbolList);
-        if(token != thensym)
+        condition(symbolList);
+
+        tempLine[0] = addLine();
+
+        if(token != thenSym)
             error(16);
         getToken(symbolList);
         statement(symbolList);
+
+        if(token == elseSym)
+        {
+            tempLine[1] = addLine();
+            line--;
+            getToken(symbolList);
+        }
+
+        getOldinstruction(tempLine[0], JPC, getLine());
+
+        if(tempLine[1])
+        {
+            statement(symbolList);
+            getOldinstruction(tempLine[1], JMP, getLine());
+        }
     }
-    else if(token == whilesym)
+    else if(token == whileSym)
     {
         getToken(symbolList);
-        condtion(symbolList);
-        if(token != dosym)
+
+        tempLine[0] = getLine();
+
+        condition(symbolList);
+
+        tempLine[1] = addLine();
+
+        if(token != doSym)
             error(18);
         getToken(symbolList);
         statement(symbolList);
+
+        emit(JMP, 0, line);
+        getOldinstruction(tempLine[1], JPC, getLine());
+
     }
-    else if(token == readsym)
+    else if(token == readSym)
     {
+        emit(SIO, 0, 1);
+
         getToken(symbolList);
-        if(token != identsym)
+        //Comment for now
+        /*if(token != identsym)
             error(26);
+        */
+        if(token == identSym)
+        {
+            if(isVar(symbolList[numToken-1].name))
+                emit(STO, 0, m1);
+            else if(isConstant(symbolList[numToken-1].name))
+            {
+                printf("Can't store\n");
+                exit(1);
+            }
+            else
+                error(11);
+        }
+
         getToken(symbolList);
     }
-    else if(token == writesym)
+    else if(token == writeSym)
     {
         getToken(symbolList);
+
+        //Comment for now
+        /*
         if(token != identsym)
             error(27);
-        getToken(symbolList);        
+            */
+        if(token == identSym)
+        {
+            if(isVar(symbolList[numToken-1].name))
+                emit(LOD, 0, m1);
+            else if(isConstant(symbolList[numToken-1].name))
+                emit(LIT, 0, m1);
+            else
+                error(11);
+        }
+
+        getToken(symbolList);
+        emit(SIO, 0, 0);
+
+
+    }
+    else if(token == endSym)
+        return;
+    else
+    {
+        if(token == periodSym);
+        else
+            error(7);
     }
 }
 
-void condtion(symbol *symbolList)
+void condition(symbol *symbolList)
 {
-    if(token == oddsym)
+    if(token == oddSym)
     {
         getToken(symbolList);
         expression(symbolList);
+        emit(OPR, 0, ODD);
     }
     else
     {
+        int temp;
         expression(symbolList);
-        if(token < eqsym || token > geqsym )
-            error(20);
+        if(token < eqSym || token > geqSym )
+        {
+            //error(20);
+            if(token == becomesSym)
+                error(1);
+            error(13);
+
+        }
+        else
+        {
+            temp = token;
+        }
+
+
         getToken(symbolList);
         expression(symbolList);
+
+        if(temp == eqSym)
+            emit(OPR, 0, EQL);
+        else if(temp == neqSym)
+            emit(OPR, 0, NEQ);
+        else if(temp == lesSym)
+            emit(OPR, 0, LSS);
+        else if(temp == leqSym)
+            emit(OPR, 0, LEQ);
+        else if(temp == gtrSym)
+            emit(OPR, 0, GTR);
+        else if(temp == geqSym)
+            emit(OPR, 0, GEQ);
+
     }
 }
 
 void expression(symbol *symbolList)
 {
-    if(token == plussym || token == minussym)
+    int temp;
+
+
+    if(token != plusSym && token != minusSym && token != numberSym && token != lparentSym && token != identSym)
+        error(21);
+
+    if(token == plusSym || token == minusSym)
         getToken(symbolList);
+
+
+
     term(symbolList);
-    while(token == plussym || token == minussym)
+
+    if(token == minusSym)
+        emit(OPR, 0, NEG);
+
+    while(token == plusSym || token == minusSym)
     {
+        temp = token;
+
+
         getToken(symbolList);
         term(symbolList);
+
+        if(temp == plusSym)
+            emit(OPR, 0, ADD);
+        if(temp == minusSym)
+            emit(OPR, 0, SUB);
+
     }
 }
 
 void term(symbol *symbolList)
 {
+    int temp;
+
     factor(symbolList);
-    while(token == multsym || token == slashsym)
+    while(token == multSym || token == slashSym)
     {
+        temp = token;
+
         getToken(symbolList);
         factor(symbolList);
+
+        if(temp == multSym)
+            emit(OPR, 0, MUL);
+        if(temp == slashSym)
+            emit(OPR, 0, DIV);
+
     }
 }
 
 void factor(symbol *symbolList)
 {
-    if(token == identsym || token == numbersym)
+    if(token == identSym || token == numberSym)
+    {
+        if(isConstant(symbolList[numToken-1].name))
+            emit(LIT, 0, m1);
+        else if(isVar(symbolList[numToken-1].name))
+            emit(LOD, 0, m1);
+        else
+            error(11);
+
         getToken(symbolList);
-    else if(token = lparentsym)
+    }
+    else if(token == numberSym)
+    {
+        emit(LIT, 0, symbolList[numToken-1].val);
+
+        getToken(symbolList);
+    }
+    else if(token = lparentSym)
     {
         getToken(symbolList);
         expression(symbolList);
-        if(token != rparentsym)
+        if(token != rparentSym)
             error(22);
         getToken(symbolList);
     }
     else
         error(24);
+}
+
+void emit(int op, int l, int m)
+{
+    code[line].op = op;
+    code[line].l = l;
+    code[line].m = m;
+
+    line++;
+}
+
+void getOldinstruction(int index, int op, int m)
+{
+    code[index].op = op;
+    code[index].l = 0;
+    code[index].m = m;
+}
+
+int isVar(char *name)
+{
+    int x = 0;
+    while(symbolTable[x].kind != 0)
+    {
+        if(strcmp(symbolTable[x].name, name) == 0 && symbolTable[x].kind == 2)
+        {
+            m1 = symbolTable[x].addr;
+            return 1;
+        }
+        x++;
+    }
+    return 0;
+}
+
+int addLine()
+{
+    return line++;
+}
+
+int getLine()
+{
+    return line;
+}
+
+void printCode(FILE *out)
+{
+    int i;
+
+
+
+    for(i = 0; i < line; i++)
+    {
+       fprintf(out, "%d %d %d\n", code[i].op, code[i].l, code[i].m);
+    }
+
+    fclose(out);
 }
