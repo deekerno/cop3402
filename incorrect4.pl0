@@ -1,4 +1,4 @@
-//encounters error 11
+/* encounters error 11 */
 var a;
 begin
   a = 7;

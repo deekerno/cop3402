@@ -1,4 +1,4 @@
-//encounters error 26
+/* encounters error 26 */
 var a, b;
 begin
   read ;

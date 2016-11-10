@@ -1,4 +1,4 @@
-//encounters error 8
+/* encounters error 8 */
 var a, b;
 begin
   a := 7;
