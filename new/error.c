@@ -41,6 +41,6 @@ char errorMessage[][MAX_LENGTH_ERROR] = {
 
 void error(int num)
 {
-    printf("Error number %3d, %s\n",num,errorMessage[num]);
+    printf("Error number %d, %s\n",num,errorMessage[num]);
     exit(1);
 }

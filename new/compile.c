@@ -1,5 +1,6 @@
 #include "parser.h"
 #include "lexer.h"
+#include "error.h"
 #include <stdio.h>
 #include <stdlib.h>
 
