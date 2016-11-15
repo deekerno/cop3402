@@ -1,8 +1,8 @@
-var a, b;
+var x, y;
 begin
-  a := 7;
-  if a > 5 then
-    b := a - 3;
-  else
-    b := a + 3;
+	x := 10;
+	y := 5;
+	if x > y then begin	
+		y := y + 5
+	end;
 end.
