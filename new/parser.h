@@ -31,7 +31,7 @@ typedef enum
     RET = 0, NEG, ADD, SUB, MUL, DIV, ODD, MOD, EQL, NEQ, LSS, LEQ, GTR, GEQ
 } operate_code;
 
-void ouputPM0(const char *fileName);
+void outputPM0(const char *fileName);
 
 void program();
 void block();

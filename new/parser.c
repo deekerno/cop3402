@@ -54,7 +54,7 @@ void put_symbol(int kind, char* name, int num, int level, int modifier)
 void emit(int op, int l, int m)
 {
     if(cx > CODE_SIZE)
-        error(25); //"Code too long."
+        error(26); //"Code too long."
     else
     {
         code[cx].op = op; // opcode
@@ -78,7 +78,7 @@ void program()
     getNextToken();
     block();
     if (token != periodsym)
-        error(8); //Period expected.
+        error(9); //Period expected.
     emit(SIO,0,2);
 }
 
@@ -91,19 +91,19 @@ void block()
         {
             getNextToken();
             if(token != identsym)
-                error(3); // const must be followed by identifier.
+                error(4); // const must be followed by identifier.
             char* id = lval.id;
             getNextToken();
             if(token != eqsym)
-                error(2); // Identifier must be followed by =.
+                error(3); // Identifier must be followed by =.
             getNextToken();
             if(token != numbersym)
-                error(1); // = must be followed by a number.
+                error(2); // = must be followed by a number.
             put_symbol(constant, id, lval.num, 0, 0);
             getNextToken();
         }while(token == commasym);
         if(token != semicolonsym) 
-            error(4); // Semicolon missing.
+            error(5); // Semicolon missing.
         getNextToken();
     }
     if(token == varsym)
@@ -112,27 +112,27 @@ void block()
         {
             getNextToken();
             if(token != identsym)
-                error(3); // var must be followed by identifier.
+                error(4); // var must be followed by identifier.
             num_vars++;
             put_symbol(variable, lval.id, 0, 0, 3 + num_vars);
             getNextToken();
         }while(token == commasym);
         if(token != semicolonsym)
-            error(4); // Semicolon missing.
+            error(5); // Semicolon missing.
         getNextToken();
     }
     while(token == procsym) 
     {
         getNextToken();
         if(token != identsym)
-            error(3); // procedure must be followed by identifier.
+            error(4); // procedure must be followed by identifier.
         getNextToken();
         if(token != semicolonsym)
-            error(4); // Semicolon missing.
+            error(5); // Semicolon missing.
         getNextToken();
         block();
         if(token != semicolonsym) 
-            error(4); // Semicolon missing.
+            error(5); // Semicolon missing.
         getNextToken();
     }
     emit(INC, 0, 4 + num_vars);
@@ -145,10 +145,10 @@ void statement()
     {
         symbol_type* temp = get_symbol(lval.id);
         if(temp->kind == constant)
-            error(26); // Cannot assign value to a constant.
+            error(27); // Cannot assign value to a constant.
         getNextToken();
         if(token != becomessym)
-            error(27);
+            error(1);
         getNextToken();
         expression();
         emit(STO,0,temp->modifier);
@@ -157,7 +157,7 @@ void statement()
     {
         getNextToken();
         if(token != identsym)
-            error(13); // call must be followed by an identifier.
+            error(14); // call must be followed by an identifier.
         getNextToken();
     }
     else if(token == beginsym)
@@ -178,7 +178,7 @@ void statement()
         getNextToken();
         condition();
         if(token != thensym)
-            error(15); // then expected.
+            error(16); // then expected.
         getNextToken();
         
         int ctemp = cx;
@@ -195,7 +195,7 @@ void statement()
         int cx2 = cx;
         emit(JPC, 0, 0);
         if(token != dosym)
-            error(17); // do expected.
+            error(18); // do expected.
         getNextToken();
         statement();
         emit(JMP, 0, cx1);
@@ -211,7 +211,7 @@ void statement()
         if(temp == NULL)
             error(30); // variable is not declared.
         if(temp->kind == constant)
-            error(26); // Cannot assign value to a constant.
+            error(27); // Cannot assign value to a constant.
         emit(STO,0,temp->modifier);
         getNextToken();
     }
@@ -245,7 +245,7 @@ void condition()
     {
         expression();
         if(token < eqsym || token > geqsym )
-            error(19); // Relational operator expected.
+            error(20); // Relational operator expected.
         int cond = token;
         int offset = eqsym - EQL;
         getNextToken();
@@ -316,14 +316,14 @@ void factor()
         getNextToken();
         expression();
         if(token != rparentsym)
-            error(21); // Right parenthesis missing.
+            error(22); // Right parenthesis missing.
         getNextToken();
     }
     else
-        error(23); // An expression cannot begin with this symbol.
+        error(24); // An expression cannot begin with this symbol.
 }
 
-void ouputPM0(const char *fileName)
+void outputPM0(const char *fileName)
 {
     int i = 0;
     FILE *fp = fopen(fileName,"w");
