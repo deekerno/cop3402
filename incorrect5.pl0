@@ -1,7 +1,10 @@
-/* encounters error 1 */
+/* encounters error 31 */
 var a, b;
+
+write ;
+
 begin
-  a 7;
-  if a > 5 then
+  a = 7;
+  if a > 5 
     b := a - 3;
 end.
