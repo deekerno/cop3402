@@ -3,6 +3,4 @@ begin
   read a;
   if a > 0 then
     b := a/2;
-  else
-    b := a*(-1);
 end.

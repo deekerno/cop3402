@@ -1,10 +1,8 @@
-/* encounters error 26 */
+/* encounters error 29 */
 var a, b;
 begin
   read ;
   a := 7;
   if a > 5 then
     b := a - 3;
-  else
-    b := a + 3;
 end.

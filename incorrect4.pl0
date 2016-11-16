@@ -1,9 +1,7 @@
-/* encounters error 11 */
+/* encounters error 1 */
 var a;
 begin
   a = 7;
   if a > 5 then
     b := a - 3;
-  else
-    b := a + 3;
 end.
