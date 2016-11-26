@@ -187,6 +187,11 @@ void statement()
         code[ctemp].m = cx;
         
     }
+    else if(token == elsesym)
+    {
+        getNextToken();
+        statement();
+    }
     else if(token == whilesym)
     {
         int cx1 = cx;
