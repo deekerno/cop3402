@@ -1,0 +1,18 @@
+var x;
+
+procedure A;
+  begin
+    x := 22;
+  end;
+
+procedure B;
+  begin
+    call A;
+    x := 33;
+  end;
+
+begin
+  x := 11;
+  call B;
+  write x;
+end.
