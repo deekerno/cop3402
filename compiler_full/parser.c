@@ -274,7 +274,7 @@ void statement()
             error(29); // variable is not declared.
         if(temp->kind == constant)
             error(11); // Assignment to constant or procedure is not allowed.
-        emit(STO,temp->level,temp->modifier);
+        emit(STO,level-temp->level,temp->modifier);
         getNextToken();
     }
     else if(token == writesym)
@@ -288,7 +288,7 @@ void statement()
         if(temp->kind == constant)
             emit(LIT,0,temp->num);
         else if(temp->kind == variable)
-            emit(LOD,temp->level,temp->modifier);
+            emit(LOD,level-temp->level,temp->modifier);
         emit(SIO,0,0);    
         getNextToken();        
     }
